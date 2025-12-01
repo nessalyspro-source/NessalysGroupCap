@@ -44,7 +44,9 @@ import {
   UploadCloud,
   MapPin,
   Hash,
-  Smartphone
+  Smartphone,
+  Lock,
+  Shield
 } from 'lucide-react';
 import {
   BarChart,
@@ -439,6 +441,149 @@ const CreateCompanyDrawer = ({ isOpen, onClose }) => {
         </div>
       </div>
     </>
+  );
+};
+
+const LoginScreen = ({ onLogin }) => {
+  const [credentials, setCredentials] = useState({
+    email: '',
+    password: '',
+    remember: true
+  });
+  const [error, setError] = useState('');
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setCredentials((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!credentials.email.trim() || !credentials.password.trim()) {
+      setError('Veuillez saisir votre email professionnel et votre mot de passe.');
+      return;
+    }
+    setError('');
+    onLogin();
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#0d1815] via-[#11241f] to-[#1c332d] flex items-center justify-center px-4 py-10 text-white">
+      <div className="w-full max-w-5xl grid md:grid-cols-2 gap-10 bg-white/5 border border-white/10 rounded-2xl shadow-[0_20px_70px_rgba(0,0,0,0.35)] overflow-hidden backdrop-blur">
+        <div className="hidden md:flex flex-col justify-between p-10 bg-gradient-to-br from-[#0f1b18] via-[#11241f] to-[#1c332d]">
+          <div>
+            <p className="text-[11px] font-bold tracking-[0.5em] uppercase text-[#8bb3a4] mb-6">Nessaly\'S Group</p>
+            <h1 className="text-4xl font-light leading-snug">
+              Acc��s sǸcurisǸ <span className="font-semibold text-[#d4dcd6]">Espace Admin</span>
+            </h1>
+            <p className="text-sm text-[#b5c4be] mt-6 leading-relaxed">
+              Centralisez vos soci��t��s, contrats, factures et tickets dans une expǸrience unifiǸe. 
+              Les informations stratǸgiques sont protǸgǸes et accessibles uniquement aux collaborateurs autorisǸs.
+            </p>
+          </div>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-full bg-white/10 text-[#8bb3a4]">
+                <Shield size={20} strokeWidth={1.5} />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-[#8bb3a4]">Protection</p>
+                <p className="text-sm text-white/90">Chiffrement TLS & Politique Zéro Traces</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 text-sm text-[#b5c4be]">
+              <CheckCircle2 size={18} className="text-[#8bb3a4]" />
+              <span>Tra��abilit�� des connexions et gestion des droits.</span>
+            </div>
+            <div className="flex items-center gap-3 text-sm text-[#b5c4be]">
+              <CheckCircle2 size={18} className="text-[#8bb3a4]" />
+              <span>Support prioritaire Nessaly\'S Group en 24h.</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl md:rounded-none p-8 md:p-10 text-left text-[#1a1a1a]">
+          <div className="mb-8">
+            <p className="text-[11px] uppercase tracking-[0.4em] text-[#a8a29e] mb-2">Portail Securis��</p>
+            <h2 className="text-2xl font-semibold text-[#1a1a1a]">Connexion administrateur</h2>
+            <p className="text-sm text-[#78716c] mt-2">Identifiez-vous pour entrer dans l\'espace de pilotage.</p>
+          </div>
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label className="text-xs font-semibold uppercase text-[#57534e] mb-2 flex items-center gap-2">
+                <Mail size={14} /> Email professionnel
+              </label>
+              <div className="flex items-center border border-[#e7e5e4] rounded-md px-4 py-3 focus-within:ring-2 focus-within:ring-[#d1dbd8]">
+                <input
+                  type="email"
+                  name="email"
+                  value={credentials.email}
+                  onChange={handleChange}
+                  placeholder="prenom.nom@nessalys.com"
+                  className="flex-1 bg-transparent outline-none text-sm text-[#1a1a1a] placeholder-[#d6d3d1]"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold uppercase text-[#57534e] mb-2 flex items-center gap-2">
+                <Lock size={14} /> Mot de passe
+              </label>
+              <div className="flex items-center border border-[#e7e5e4] rounded-md px-4 py-3 focus-within:ring-2 focus-within:ring-[#d1dbd8]">
+                <input
+                  type="password"
+                  name="password"
+                  value={credentials.password}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  className="flex-1 bg-transparent outline-none text-sm tracking-widest text-[#1a1a1a] placeholder-[#d6d3d1]"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-xs text-[#57534e]">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  name="remember"
+                  checked={credentials.remember}
+                  onChange={handleChange}
+                  className="w-4 h-4 border border-[#d6d3d1] rounded-sm text-[#2a403d] focus:ring-[#2a403d]"
+                />
+                <span>Mémoriser cette session</span>
+              </label>
+              <button type="button" className="font-medium text-[#2a403d] hover:text-[#1a2624]">Mot de passe oublié ?</button>
+            </div>
+
+            {error && (
+              <p className="text-xs text-[#8a3c3c] bg-[#fdf2f2] border border-[#f2dede] px-3 py-2 rounded-sm">
+                {error}
+              </p>
+            )}
+
+            <div className="space-y-3">
+              <button
+                type="submit"
+                className="w-full bg-[#2a403d] hover:bg-[#1a2624] text-white py-3 rounded-md font-semibold tracking-wide uppercase text-sm shadow-lg shadow-[#0f1b18]/40 transition-all"
+              >
+                Se connecter
+              </button>
+              <button
+                type="button"
+                onClick={onLogin}
+                className="w-full border border-[#d1dbd8] text-[#2a403d] py-3 rounded-md font-semibold tracking-wide uppercase text-sm hover:bg-[#f5f5f4] transition-colors"
+              >
+                Accéder à la démo
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -1324,6 +1469,7 @@ const BillingView = () => {
 // --- Layout & App ---
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -1345,6 +1491,10 @@ export default function App() {
       default: return <DashboardView />;
     }
   };
+
+  if (!isAuthenticated) {
+    return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
+  }
 
   return (
     <div className="flex h-screen bg-[#fcfcfc] font-sans text-[#1a1a1a] selection:bg-[#dce6e3] selection:text-[#1a2624]">
