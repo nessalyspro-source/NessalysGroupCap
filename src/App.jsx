@@ -223,59 +223,169 @@ const DashboardView = ({ companies, invoices, tickets, revenuePoints }) => {
   )
 }
 
-const CompaniesView = ({ companies }) => (
-  <div className="space-y-6">
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-      <div>
-        <h2 className="text-2xl font-light text-[#111827]">Societes</h2>
-        <p className="text-sm text-[#6b7280]">Les fiches seront injectees depuis Supabase.</p>
+const CompaniesView = ({ companies, onCreateCompany }) => {
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [form, setForm] = useState({
+    name: '',
+    reference: '',
+    address: '',
+    contracts: '',
+    revenue: '',
+    contactEmail: '',
+    status: 'Pending'
+  })
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setForm((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (!form.name.trim()) return
+    onCreateCompany({
+      name: form.name.trim(),
+      reference: form.reference.trim() || `NG-SCT-${Date.now().toString().slice(-4)}`,
+      address: form.address.trim(),
+      contracts: Number(form.contracts) || 0,
+      revenue: Number(form.revenue) || 0,
+      contactEmail: form.contactEmail.trim(),
+      status: form.status || 'Pending'
+    })
+    setForm({
+      name: '',
+      reference: '',
+      address: '',
+      contracts: '',
+      revenue: '',
+      contactEmail: '',
+      status: 'Pending'
+    })
+    setIsFormOpen(false)
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h2 className="text-2xl font-light text-[#111827]">Societes</h2>
+          <p className="text-sm text-[#6b7280]">Les fiches seront injectees depuis Supabase.</p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+          <div className="relative flex-1 sm:flex-grow-0 sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]" size={16} />
+            <input className="w-full border border-[#d1d5db] rounded-md pl-10 pr-4 py-2.5 text-sm" placeholder="Recherche" disabled />
+          </div>
+          <button
+            onClick={() => setIsFormOpen(true)}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-[#2a403d] text-white text-sm font-semibold"
+          >
+            <Plus size={16} /> Nouvelle societe
+          </button>
+        </div>
       </div>
-      <div className="relative w-full max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]" size={16} />
-        <input className="w-full border border-[#d1d5db] rounded-md pl-10 pr-4 py-2.5 text-sm" placeholder="Recherche" disabled />
-      </div>
-    </div>
-    {companies.length ? (
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {companies.map((company) => {
-          const initials = (company.name || 'NG').split(' ').map((word) => word[0]).join('').slice(0, 2).toUpperCase()
-          return (
-            <div key={company.id} className="bg-white border border-[#e5e5e5] rounded-lg p-5 shadow-sm flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-md bg-[#2a403d] text-white flex items-center justify-center font-semibold">
-                  {initials}
+
+      {companies.length ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {companies.map((company) => {
+            const initials = (company.name || 'NG').split(' ').map((word) => word[0]).join('').slice(0, 2).toUpperCase()
+            return (
+              <div key={company.id} className="bg-white border border-[#e5e5e5] rounded-lg p-5 shadow-sm flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-md bg-[#2a403d] text-white flex items-center justify-center font-semibold">
+                    {initials}
+                  </div>
+                  <span className="text-[11px] font-mono text-[#9ca3af]">{company.reference || 'REF-000'}</span>
                 </div>
-                <span className="text-[11px] font-mono text-[#9ca3af]">{company.reference || 'REF-000'}</span>
+                <div>
+                  <p className="text-lg font-semibold text-[#111827]">{company.name || 'Societe'}</p>
+                  <p className="text-sm text-[#6b7280]">{company.address || 'Adresse a renseigner'}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-xs uppercase text-[#9ca3af]">Contrats</p>
+                    <p className="font-semibold text-[#2a403d]">{company.contracts ?? '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase text-[#9ca3af]">CA mensuel</p>
+                    <p className="font-semibold text-[#2a403d]">{company.revenue ? formatCurrency(company.revenue) : '-'}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-xs text-[#6b7280]">
+                  <span>{company.contactEmail || 'email@client.com'}</span>
+                  <span className="px-2 py-1 border border-[#d1d5db] rounded-md text-[11px] uppercase">
+                    {company.status || 'Pending'}
+                  </span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <EmptyState icon={Building2} title="Aucune societe" description="Creez vos fiches depuis Supabase pour alimenter cette vue." />
+      )}
+
+      {isFormOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white w-full max-w-lg rounded-lg shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-[#111827]">Nouvelle societe</h3>
+              <button onClick={() => setIsFormOpen(false)} className="text-[#6b7280] hover:text-[#111827]">
+                <X size={20} />
+              </button>
+            </div>
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div>
+                <label className="text-xs uppercase text-[#6b7280] font-semibold">Nom</label>
+                <input name="name" value={form.name} onChange={handleChange} className="w-full border border-[#d1d5db] rounded-md px-4 py-2 text-sm" required />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs uppercase text-[#6b7280] font-semibold">Reference</label>
+                  <input name="reference" value={form.reference} onChange={handleChange} className="w-full border border-[#d1d5db] rounded-md px-4 py-2 text-sm" />
+                </div>
+                <div>
+                  <label className="text-xs uppercase text-[#6b7280] font-semibold">Email contact</label>
+                  <input name="contactEmail" value={form.contactEmail} onChange={handleChange} className="w-full border border-[#d1d5db] rounded-md px-4 py-2 text-sm" type="email" />
+                </div>
               </div>
               <div>
-                <p className="text-lg font-semibold text-[#111827]">{company.name || 'Societe'}</p>
-                <p className="text-sm text-[#6b7280]">{company.address || 'Adresse a renseigner'}</p>
+                <label className="text-xs uppercase text-[#6b7280] font-semibold">Adresse</label>
+                <input name="address" value={form.address} onChange={handleChange} className="w-full border border-[#d1d5db] rounded-md px-4 py-2 text-sm" />
               </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <p className="text-xs uppercase text-[#9ca3af]">Contrats</p>
-                  <p className="font-semibold text-[#2a403d]">{company.contracts ?? '-'}</p>
+                  <label className="text-xs uppercase text-[#6b7280] font-semibold">Contrats</label>
+                  <input name="contracts" value={form.contracts} onChange={handleChange} type="number" className="w-full border border-[#d1d5db] rounded-md px-4 py-2 text-sm" />
                 </div>
                 <div>
-                  <p className="text-xs uppercase text-[#9ca3af]">CA mensuel</p>
-                  <p className="font-semibold text-[#2a403d]">{company.revenue ? formatCurrency(company.revenue) : '-'}</p>
+                  <label className="text-xs uppercase text-[#6b7280] font-semibold">CA mensuel</label>
+                  <input name="revenue" value={form.revenue} onChange={handleChange} type="number" className="w-full border border-[#d1d5db] rounded-md px-4 py-2 text-sm" />
+                </div>
+                <div>
+                  <label className="text-xs uppercase text-[#6b7280] font-semibold">Statut</label>
+                  <select name="status" value={form.status} onChange={handleChange} className="w-full border border-[#d1d5db] rounded-md px-4 py-2 text-sm bg-white">
+                    <option value="Active">Active</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
                 </div>
               </div>
-              <div className="flex items-center justify-between text-xs text-[#6b7280]">
-                <span>{company.contactEmail || 'email@client.com'}</span>
-                <span className="px-2 py-1 border border-[#d1d5db] rounded-md text-[11px] uppercase">
-                  {company.status || 'Pending'}
-                </span>
+              <div className="flex justify-end gap-3">
+                <button type="button" onClick={() => setIsFormOpen(false)} className="px-4 py-2 text-sm border border-[#d1d5db] rounded-md">
+                  Annuler
+                </button>
+                <button type="submit" className="px-6 py-2 text-sm font-semibold rounded-md bg-[#2a403d] text-white">
+                  Enregistrer
+                </button>
               </div>
-            </div>
-          )
-        })}
-      </div>
-    ) : (
-      <EmptyState icon={Building2} title="Aucune societe" description="Creez vos fiches depuis Supabase pour alimenter cette vue." />
-    )}
-  </div>
-)
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 const BillingView = ({ invoices }) => (
   <div className="space-y-6">
@@ -372,17 +482,27 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
-  const [companies] = useState([])
+  const [companies, setCompanies] = useState([])
   const [invoices] = useState([])
   const [tickets] = useState([])
   const [revenuePoints] = useState([])
+
+  const handleCreateCompany = (company) => {
+    setCompanies((prev) => [
+      ...prev,
+      {
+        id: `company-${Date.now()}`,
+        ...company
+      }
+    ])
+  }
 
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return <DashboardView companies={companies} invoices={invoices} tickets={tickets} revenuePoints={revenuePoints} />
       case 'companies':
-        return <CompaniesView companies={companies} />
+        return <CompaniesView companies={companies} onCreateCompany={handleCreateCompany} />
       case 'billing':
         return <BillingView invoices={invoices} />
       case 'stats':
